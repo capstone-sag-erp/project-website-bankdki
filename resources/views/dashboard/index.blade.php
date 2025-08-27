@@ -7,7 +7,7 @@
         <h1 class="text-xl font-bold text-red-700 mb-8">FileB</h1>
         <ul class="space-y-4">
             <li><a href="#" class="text-red-700 font-semibold">Dashboard</a></li>
-            <li><a href="#" class="text-gray-600">My Files</a></li>
+            <a href="{{ route('files.myfiles') }}" class="text-gray-700 hover:text-red-700">My Files</a>
             <li><a href="#" class="text-gray-600">Favorite</a></li>
         </ul>
     </div>

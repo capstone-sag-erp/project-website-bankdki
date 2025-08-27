@@ -17,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('files', FileController::class);
     Route::get('files/{file}/view',     [FileController::class, 'view'])->name('files.view');
     Route::get('files/{file}/download', [FileController::class, 'download'])->name('files.download');
+    Route::get('/my-files', [FileController::class, 'myFiles'])->name('files.myfiles');
 
     // Profile
     Route::get('/profile',    [ProfileController::class, 'edit'])->name('profile.edit');

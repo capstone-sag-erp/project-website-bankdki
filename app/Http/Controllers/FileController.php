@@ -149,4 +149,36 @@ class FileController extends Controller
 
         return Storage::disk('public')->download($file->file_path, $downloadName);
     }
+
+    public function myFiles(Request $request)
+    {
+        $query = File::with(['category', 'folder'])
+            ->where('user_id', Auth::id());
+
+        // Filter pencarian
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%'.$request->search.'%');
+        }
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->filled('date_from') && $request->filled('date_to')) {
+            $query->whereBetween('created_at', [
+                $request->date_from.' 00:00:00',
+                $request->date_to.' 23:59:59'
+            ]);
+        }
+
+        // Urutan (default: terbaru)
+        $sort = $request->get('sort', 'created_at');
+        $dir  = $request->get('dir', 'desc');
+        $allowedSort = ['title','created_at','size'];
+        if (! in_array($sort, $allowedSort)) $sort = 'created_at';
+        if (! in_array($dir, ['asc','desc'])) $dir = 'desc';
+
+        $files = $query->orderBy($sort, $dir)->paginate(12)->withQueryString();
+        $categories = Category::all();
+
+        return view('files.myfiles', compact('files', 'categories', 'sort', 'dir'));
+    }
 }
