@@ -37,10 +37,10 @@
                 <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-red-700">Dashboard</a>
             </li>
             <li>
-                <a href="{{ route('files.myfiles') }}" class="text-red-700">My Files</a>
+                <a href="{{ route('files.myfiles') }}" class="text-gray-700 hover:text-red-700">My Files</a>
             </li>
             <li>
-                <a href="#" class="text-gray-700 hover:text-red-700">Favorite</a>
+                <a href="{{ route('files.favorites') }}" class="text-gray-700 hover:text-red-700">Favorites</a>
             </li>
         </ul>
     </div>
@@ -94,7 +94,7 @@
             <button class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm">Filter</button>
             @if(request()->anyFilled(['search','category_id','date_from','date_to']))
                 <a href="{{ route('files.myfiles', ['view' => $isGrid ? 'grid' : 'list']) }}" class="text-sm text-gray-600 underline">Clear</a>
-            @endif>
+            @endif
 
             <!-- Sort -->
             <div class="ml-auto">
@@ -124,6 +124,7 @@
                     <table class="min-w-full table-auto text-sm">
                         <thead class="bg-gray-100 text-gray-700">
                             <tr>
+                                <th class="px-5 py-3 text-left w-12">Fav</th>
                                 <th class="px-5 py-3 text-left">Name</th>
                                 <th class="px-5 py-3 text-left">Category</th>
                                 <th class="px-5 py-3 text-left">Folder</th>
@@ -135,13 +136,29 @@
                         <tbody>
                             @foreach ($files as $file)
                                 <tr class="border-t hover:bg-gray-50">
+                                    {{-- Fav (solid star untuk dua state, beda warna) --}}
+                                    <td class="px-5 py-3">
+                                        <button
+                                            class="fav-toggle w-7 h-7 grid place-items-center rounded hover:bg-yellow-50"
+                                            data-id="{{ $file->id }}"
+                                            title="Toggle favorite"
+                                            aria-label="Toggle favorite">
+                                            <i class="fa-solid fa-star fa-fw text-xl {{ isset($favoritedMap[$file->id]) ? 'text-yellow-500' : 'text-gray-400' }}"></i>
+                                        </button>
+                                    </td>
+
+                                    {{-- Name --}}
                                     <td class="px-5 py-3">
                                         <div class="flex items-center gap-2">
                                             <i class="fa-solid {{ fileExtIcon($file) }} text-gray-600"></i>
                                             <a href="{{ route('files.view', $file->id) }}" target="_blank" class="text-red-600 hover:underline">{{ $file->title }}</a>
                                         </div>
                                     </td>
+
+                                    {{-- Category --}}
                                     <td class="px-5 py-3">{{ $file->category->name ?? '-' }}</td>
+
+                                    {{-- Folder --}}
                                     <td class="px-5 py-3">
                                         @if($file->folder)
                                             <span class="inline-block bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">
@@ -151,8 +168,14 @@
                                             &mdash;
                                         @endif
                                     </td>
+
+                                    {{-- Uploaded --}}
                                     <td class="px-5 py-3">{{ $file->created_at->format('d M Y') }}</td>
+
+                                    {{-- Size --}}
                                     <td class="px-5 py-3">{{ humanBytesLocal($file->size) }}</td>
+
+                                    {{-- Actions --}}
                                     <td class="px-5 py-3">
                                         <div class="relative inline-block">
                                             <button class="p-2 rounded-full hover:bg-gray-100 action-trigger" aria-expanded="false">
@@ -185,7 +208,15 @@
                         <div class="group bg-white rounded-xl p-4 shadow hover:shadow-lg transition relative">
                             <div class="flex items-start justify-between">
                                 <div class="flex items-center gap-2">
-                                    <i class="fa-solid {{ fileExtIcon($file) }} text-xl text-gray-700"></i>
+                                    {{-- Fav button (solid star dua state, beda warna) --}}
+                                    <button
+                                        class="fav-toggle w-7 h-7 grid place-items-center rounded hover:bg-yellow-50"
+                                        data-id="{{ $file->id }}"
+                                        title="Toggle favorite"
+                                        aria-label="Toggle favorite">
+                                        <i class="fa-solid fa-star fa-fw text-xl {{ isset($favoritedMap[$file->id]) ? 'text-yellow-500' : 'text-gray-400' }}"></i>
+                                    </button>
+
                                     <div>
                                         <a href="{{ route('files.view', $file->id) }}" target="_blank" class="font-medium text-gray-800 hover:underline line-clamp-1">{{ $file->title }}</a>
                                         <div class="text-xs text-gray-500">
@@ -193,9 +224,11 @@
                                         </div>
                                     </div>
                                 </div>
+
                                 <button class="p-2 rounded-full hover:bg-gray-100 action-trigger" aria-expanded="false">
                                     <i class="fa-solid fa-ellipsis-vertical text-gray-600"></i>
                                 </button>
+
                                 <div class="action-menu hidden absolute right-2 top-10 w-44 bg-white border rounded shadow-md z-30">
                                     <ul class="py-1">
                                         <li><a href="{{ route('files.view', $file->id) }}" target="_blank" class="block px-4 py-2 hover:bg-gray-100">View</a></li>
@@ -210,6 +243,7 @@
                                     </ul>
                                 </div>
                             </div>
+
                             @if($file->folder)
                                 <span class="mt-3 inline-block bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">{{ $file->folder->name }}</span>
                             @endif
@@ -274,8 +308,7 @@
                 <select name="folder_id" id="editFileFolder"
                         class="mt-1 w-full px-3 py-2 border rounded-lg focus:outline-none">
                     <option value="">— No Folder —</option>
-                    {{-- Optional: kalau mau isi semua folder di semua kategori, bisa diisi di controller.
-                         Untuk sekarang biarkan kosong; update ini hanya rename kalau tidak ada data folder --}}
+                    {{-- Optional: isi folder sesuai kebutuhan --}}
                 </select>
                 <p class="text-xs text-gray-500 mt-1">*Pindah folder hanya bekerja untuk folder yang tersedia di kategori terkait (opsional).</p>
             </div>
@@ -290,17 +323,27 @@
 <style>
     .action-menu{border-radius:.75rem}
     .action-menu::before{content:"";position:absolute;top:-6px;right:12px;width:12px;height:12px;background:#fff;transform:rotate(45deg);box-shadow:-1px -1px 2px rgba(0,0,0,.06);z-index:-1}
+
+    /* Biar ikon bintang selalu terlihat dan sedikit “nendang” */
+    .fav-toggle i {
+        line-height: 1;
+        filter: drop-shadow(0 0 1px rgba(0,0,0,.06));
+    }
 </style>
 
 <script>
-    function toggleUploadModal(show){document.getElementById('uploadModal').classList.toggle('hidden', !show)}
+    function toggleUploadModal(show){
+        document.getElementById('uploadModal').classList.toggle('hidden', !show)
+    }
     function openEditFileModal(id, title, folderId){
         document.getElementById('editFileTitle').value = title;
         document.getElementById('editFileFolder').value = folderId ?? '';
         document.getElementById('editFileForm').action = `/files/${id}`;
         toggleEditFileModal(true);
     }
-    function toggleEditFileModal(show){document.getElementById('editFileModal').classList.toggle('hidden', !show)}
+    function toggleEditFileModal(show){
+        document.getElementById('editFileModal').classList.toggle('hidden', !show)
+    }
 
     // dropdown 3-titik
     document.addEventListener('click', function (e) {
@@ -316,6 +359,39 @@
         }
         document.querySelectorAll('.action-menu').forEach(m => m.classList.add('hidden'));
         document.querySelectorAll('.action-trigger').forEach(b => b.setAttribute('aria-expanded','false'));
+    });
+
+    // Toggle Favorite (AJAX) — cukup toggle warna (ikon selalu fa-solid)
+    document.addEventListener('click', async function(e){
+        const btn = e.target.closest('.fav-toggle');
+        if (!btn) return;
+
+        const fileId = btn.dataset.id;
+        try {
+            const res = await fetch(`/files/${fileId}/favorite`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
+            if (!res.ok) throw new Error('Request failed');
+            const data = await res.json();
+
+            const icon = btn.querySelector('i');
+            if (!icon) return;
+
+            if (data.status === 'added') {
+                icon.classList.remove('text-gray-400');
+                icon.classList.add('text-yellow-500');
+            } else {
+                icon.classList.remove('text-yellow-500');
+                icon.classList.add('text-gray-400');
+            }
+        } catch(err){
+            alert('Gagal mengubah favorit.');
+            console.error(err);
+        }
     });
 </script>
 @endsection

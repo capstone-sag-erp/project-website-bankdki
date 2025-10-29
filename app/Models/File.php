@@ -32,4 +32,22 @@ class File extends Model
         }
         return number_format($value / 1024, 2) . ' KB';
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(\App\Models\Favorite::class);
+    }
+
+    public function isFavoritedByAuth(): bool
+    {
+        $uid = auth()->id();
+        if (!$uid) return false;
+
+        if ($this->relationLoaded('favorites')) {
+            return $this->favorites->where('user_id', $uid)->isNotEmpty();
+        }
+        return \App\Models\Favorite::where('user_id', $uid)
+            ->where('file_id', $this->id)
+            ->exists();
+    }
 }

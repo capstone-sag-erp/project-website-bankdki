@@ -2,13 +2,81 @@
 
 @section('content')
 <div class="flex">
-    <!-- Sidebar -->
+    <!-- Sidebar (panel "FileB" di kolom tengah halaman dashboard) -->
     <div class="w-1/5 min-h-screen bg-white border-r px-6 py-8">
         <h1 class="text-xl font-bold text-red-700 mb-8">FileB</h1>
-        <ul class="space-y-4">
-            <li><a href="#" class="text-red-700 font-semibold">Dashboard</a></li>
-            <a href="{{ route('files.myfiles') }}" class="text-gray-700 hover:text-red-700">My Files</a>
-            <li><a href="#" class="text-gray-600">Favorite</a></li>
+
+        {{-- LIST BARU: tanpa "My Files" & "Favorites" --}}
+        <ul class="space-y-4 text-sm font-semibold">
+            {{-- Dashboard (tetap ada) --}}
+            <li>
+                <a href="{{ route('dashboard') }}"
+                   class="{{ request()->routeIs('dashboard') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   Dashboard
+                </a>
+            </li>
+
+            {{-- SAG (tautan utama ke area SAG; aman jika route belum ada) --}}
+            @if (Route::has('users.index'))
+            <li>
+                <a href="{{ route('users.index') }}"
+                   class="{{ request()->routeIs('users.*') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   SAG
+                </a>
+            </li>
+            @endif
+
+            {{-- ERP (tautan utama ke area ERP) --}}
+            @if (Route::has('customers.index'))
+            <li>
+                <a href="{{ route('customers.index') }}"
+                   class="{{ request()->routeIs('customers.*') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   ERP
+                </a>
+            </li>
+            @endif
+
+            {{-- Customer Data --}}
+            @if (Route::has('customers.index'))
+            <li>
+                <a href="{{ route('customers.index') }}"
+                   class="{{ request()->routeIs('customers.*') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   Customer Data
+                </a>
+            </li>
+            @endif
+
+            {{-- Transactions --}}
+            @if (Route::has('transactions.index'))
+            <li>
+                <a href="{{ route('transactions.index') }}"
+                   class="{{ request()->routeIs('transactions.*') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   Transactions
+                </a>
+            </li>
+            @endif
+
+            {{-- KPI Dashboard --}}
+            @if (Route::has('kpi.index'))
+            <li>
+                <a href="{{ route('kpi.index') }}"
+                   class="{{ request()->routeIs('kpi.*') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   KPI Dashboard
+                </a>
+            </li>
+            @endif
+
+            {{-- Account / My Profile --}}
+            @if (Route::has('profile.edit'))
+            <li class="pt-2 border-t border-gray-100"></li>
+            <li class="text-[11px] uppercase tracking-wider text-gray-400">Account</li>
+            <li>
+                <a href="{{ route('profile.edit') }}"
+                   class="{{ request()->routeIs('profile.edit') ? 'text-red-700' : 'text-gray-700 hover:text-red-700' }}">
+                   My Profile
+                </a>
+            </li>
+            @endif
         </ul>
     </div>
 
@@ -151,7 +219,6 @@
                                 <td class="px-6 py-2">{{ $file->created_at->diffForHumans() }}</td>
                                 <td class="px-6 py-2">
                                     @php
-                                        // hanya konversi jika numeric
                                         if (is_numeric($file->size)) {
                                             $bytes = $file->size;
                                             $disp = $bytes >= 1048576

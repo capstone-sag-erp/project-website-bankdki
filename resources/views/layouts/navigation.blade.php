@@ -10,15 +10,31 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links (desktop) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    {{-- Dashboard --}}
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
+                    {{-- File Manager --}}
                     <x-nav-link :href="route('files.index')" :active="request()->routeIs('files.*')">
                         {{ __('File Manager') }}
                     </x-nav-link>
+
+                    {{-- SAG --}}
+                    @if (Route::has('users.index'))
+                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                        {{ __('SAG') }}
+                    </x-nav-link>
+                    @endif
+
+                    {{-- ERP --}}
+                    @if (Route::has('customers.index'))
+                    <x-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                        {{ __('ERP') }}
+                    </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -67,7 +83,7 @@
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
+    <!-- Responsive Navigation Menu (mobile) -->
     <div :class="{ 'block': open, 'hidden': ! open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -77,6 +93,19 @@
             <x-responsive-nav-link :href="route('files.index')" :active="request()->routeIs('files.*')">
                 {{ __('File Manager') }}
             </x-responsive-nav-link>
+
+            {{-- Tambahkan SAG & ERP juga di menu responsif --}}
+            @if (Route::has('users.index'))
+            <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                {{ __('SAG') }}
+            </x-responsive-nav-link>
+            @endif
+
+            @if (Route::has('customers.index'))
+            <x-responsive-nav-link :href="route('customers.index')" :active="request()->routeIs('customers.*')">
+                {{ __('ERP') }}
+            </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
