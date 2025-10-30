@@ -56,4 +56,31 @@ class User extends Authenticatable
         return $this->belongsToMany(\App\Models\File::class, 'favorites')->withTimestamps();
     }
 
+    // ...
+    public function roles()
+    {
+        return $this->belongsToMany(\App\Models\Role::class, 'user_roles')->withTimestamps();
+    }
+
+    public function permissions() // via role_permission
+    {
+        return \App\Models\Permission::query()
+            ->select('permissions.*')
+            ->join('role_permission','role_permission.permission_id','=','permissions.id')
+            ->join('user_roles','user_roles.role_id','=','role_permission.role_id')
+            ->where('user_roles.user_id', $this->id)
+            ->where('role_permission.allowed', true);
+    }
+
+    public function hasRole(string $roleName): bool
+    {
+        return $this->roles()->where('name', $roleName)->exists();
+    }
+
+    public function canKey(string $permissionKey): bool
+    {
+        return $this->permissions()->where('permissions.key_name', $permissionKey)->exists();
+    }
+
+
 }

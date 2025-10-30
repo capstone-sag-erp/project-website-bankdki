@@ -3,9 +3,13 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
+
+// tambahkan seeder lain yang kamu punya
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\RolesAndPermissionsSeeder;
+use Database\Seeders\UserSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -14,17 +18,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Cek apakah user sudah ada berdasarkan email
+        // ✅ pastikan user test default masih ada
         if (!DB::table('users')->where('email', 'test@example.com')->exists()) {
             User::factory()->create([
-                'name' => 'Test User',
+                'name'  => 'Test User',
                 'email' => 'test@example.com',
             ]);
         }
 
-        // Jalankan seeder kategori
+        // ✅ jalankan semua seeder tambahan
         $this->call([
-            CategorySeeder::class,
+            CategorySeeder::class,           // seeder kategori kamu
+            RolesAndPermissionsSeeder::class, // buat roles, permissions, mapping
+            UserSeeder::class,                // buat akun manager & staff
         ]);
     }
 }
