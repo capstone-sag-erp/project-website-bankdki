@@ -44,33 +44,70 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/folders/{id}', [FolderController::class, 'destroy'])->name('folders.destroy');
 
 
+    // ==================== ERP - AKSES MANAGER & STAFF (Input Data) ====================
+    Route::middleware(['role:manager,staff'])->group(function () {
+        // ERP - Nasabah (manager & staff bisa input/edit)
+        Route::get('/erp/nasabah/create', [App\Http\Controllers\ErpController::class, 'createNasabah'])->name('erp.nasabah.create');
+        Route::post('/erp/nasabah', [App\Http\Controllers\ErpController::class, 'storeNasabah'])->name('erp.nasabah.store');
+        Route::get('/erp/nasabah/{nasabah}/edit', [App\Http\Controllers\ErpController::class, 'editNasabah'])->name('erp.nasabah.edit');
+        Route::put('/erp/nasabah/{nasabah}', [App\Http\Controllers\ErpController::class, 'updateNasabah'])->name('erp.nasabah.update');
+
+        // ERP - Transaksi (manager & staff bisa input/edit)
+        Route::get('/erp/transaksi/create', [App\Http\Controllers\ErpController::class, 'createTransaksi'])->name('erp.transaksi.create');
+        Route::post('/erp/transaksi', [App\Http\Controllers\ErpController::class, 'storeTransaksi'])->name('erp.transaksi.store');
+        Route::get('/erp/transaksi/{transaction}/edit', [App\Http\Controllers\ErpController::class, 'editTransaksi'])->name('erp.transaksi.edit');
+        Route::put('/erp/transaksi/{transaction}', [App\Http\Controllers\ErpController::class, 'updateTransaksi'])->name('erp.transaksi.update');
+    });
+
     // ==================== AKSES KHUSUS MANAGER ====================
     Route::middleware(['role:manager'])->group(function () {
         // Workflow approvals (hanya manager)
-        Route::get('/files/approvals', fn() => view('welcome'))
+        Route::get('/workflow/approvals', [App\Http\Controllers\WorkflowController::class, 'index'])
             ->middleware('perm:workflow.view')
-            ->name('files.approvals.index');
+            ->name('workflow.index');
 
-        Route::post('/workflow/approve/{id}', fn() => abort(501))
+        Route::post('/workflow/approve/{file}', [App\Http\Controllers\WorkflowController::class, 'approve'])
             ->middleware('perm:workflow.approve')
             ->name('workflow.approve');
+
+        Route::post('/workflow/reject/{file}', [App\Http\Controllers\WorkflowController::class, 'reject'])
+            ->middleware('perm:workflow.approve')
+            ->name('workflow.reject');
+
+        // KPI Dashboard (hanya manager)
+        Route::get('/kpi', [App\Http\Controllers\KpiController::class, 'index'])
+            ->middleware('perm:kpi.view')
+            ->name('kpi.index');
+
+        Route::post('/kpi/update-monthly', [App\Http\Controllers\KpiController::class, 'updateKpiMonthly'])
+            ->name('kpi.update-monthly');
+
+        // ERP - Delete (hanya manager)
+        Route::delete('/erp/nasabah/{nasabah}', [App\Http\Controllers\ErpController::class, 'destroyNasabah'])->name('erp.nasabah.destroy');
+        Route::delete('/erp/transaksi/{transaction}', [App\Http\Controllers\ErpController::class, 'destroyTransaksi'])->name('erp.transaksi.destroy');
 
         // Halaman yang hanya boleh manager
         Route::get('/users', fn() => view('welcome'))->name('users.index');
         Route::get('/audit-logs', fn() => view('welcome'))->name('audit-logs.index');
         Route::get('/roles', fn() => view('welcome'))->name('roles.index');
-        Route::get('/customers', fn() => view('welcome'))->name('customers.index');
-        Route::get('/transactions', fn() => view('welcome'))->name('transactions.index');
-        Route::get('/kpi', fn() => view('welcome'))->middleware('perm:kpi.view')->name('kpi.index');
     });
 
     // ==================== AKSES KHUSUS STAFF ====================
     Route::middleware(['role:staff'])->group(function () {
-        // Contoh halaman khusus staff (misal upload dokumen)
-        Route::get('/documents/upload', fn() => view('welcome'))
-            ->middleware('perm:documents.upload')
-            ->name('documents.create');
+        // Staff bisa lihat status submission mereka
+        Route::get('/workflow/my-submissions', [App\Http\Controllers\WorkflowController::class, 'mySubmissions'])
+            ->name('workflow.my-submissions');
+
+        Route::post('/workflow/submit/{file}', [App\Http\Controllers\WorkflowController::class, 'submit'])
+            ->name('workflow.submit');
     });
+
+    // ==================== ERP - AKSES MANAGER & STAFF ====================
+    // Manager: Full CRUD, Staff: Read Only
+    Route::get('/erp/nasabah', [App\Http\Controllers\ErpController::class, 'indexNasabah'])->name('erp.nasabah.index');
+    Route::get('/erp/nasabah/{nasabah}', [App\Http\Controllers\ErpController::class, 'showNasabah'])->name('erp.nasabah.show');
+    Route::get('/erp/transaksi', [App\Http\Controllers\ErpController::class, 'indexTransaksi'])->name('erp.transaksi.index');
+    Route::get('/erp/rekap', [App\Http\Controllers\ErpController::class, 'rekap'])->name('erp.rekap');
 });
 
 require __DIR__ . '/auth.php';
